@@ -1,43 +1,74 @@
 import streamlit as st
 import yt_dlp
 import os
+import time
 
-st.set_page_config(page_title="YouTube 下載器", page_icon="🎥")
-st.title("🎥 YouTube 影片下載工具")
+# 1. 網頁基本配置
+st.set_page_config(page_title="YouTube 下載器", page_icon="🎬")
 
-# 這裡加入簡單的說明
-st.info("請在下方輸入 YouTube 網址，系統會嘗試解析並提供下載按鈕。")
+# 介面標題
+st.title("🎬 YouTube 高清影片下載工具")
+st.markdown("---")
 
-url = st.text_input("請貼上 YouTube 影片網址:")
+# 2. 用戶輸入
+url = st.text_input("📌 請貼上 YouTube 影片網址 (例如: https://www.youtube.com/watch?v=...)", placeholder="https://...")
 
 if url:
     try:
-        # 下載設定
-        save_path = "video.mp4"
+        # 設定下載後的臨時檔名
+        save_path = f"video_{int(time.time())}.mp4"
+        
+        # --- 核心下載設定 (強化偽裝版) ---
         ydl_opts = {
-            'format': 'best', 
+            'format': 'best',  # 下載最高畫質的單一檔案
             'outtmpl': save_path,
+            'quiet': True,
+            'no_warnings': True,
+            # 加入瀏覽器偽裝，減少 403 錯誤
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            'referer': 'https://www.google.com/',
         }
 
-        with st.spinner('正在處理影片，請稍候...'):
+        with st.status("🚀 正在與 YouTube 伺服器連線...", expanded=True) as status:
+            st.write("正在解析影片資訊...")
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                # 提取資訊並下載到伺服器暫存
+                # 提取影片資訊
                 info = ydl.extract_info(url, download=True)
                 video_title = info.get('title', 'video')
+                video_thumbnail = info.get('thumbnail', None)
+                
+            status.update(label="✅ 處理完成！", state="complete", expanded=False)
 
-        # 讀取暫存檔並顯示下載按鈕
+        # 3. 顯示結果與下載按鈕
         if os.path.exists(save_path):
+            st.success(f"🎥 準備就緒：{video_title}")
+            
+            # 如果有縮圖則顯示
+            if video_thumbnail:
+                st.image(video_thumbnail, width=300)
+            
             with open(save_path, "rb") as f:
-                st.success(f"✅ 已成功解析：{video_title}")
                 st.download_button(
-                    label="📥 點擊這裡下載影片到你的裝置",
+                    label="📥 點擊這裡儲存影片",
                     data=f,
                     file_name=f"{video_title}.mp4",
-                    mime="video/mp4"
+                    mime="video/mp4",
+                    use_container_width=True
                 )
-            # 刪除伺服器上的暫存檔
+            
+            # 任務完成後清理伺服器空間
             os.remove(save_path)
 
     except Exception as e:
-        st.error(f"出錯了：{e}")
-        st.warning("提示：如果出現 403 錯誤，通常是 YouTube 暫時封鎖了伺服器的 IP，請稍後再試。")
+        error_msg = str(e)
+        st.error("❌ 下載失敗")
+        
+        if "403" in error_msg:
+            st.warning("⚠️ 錯誤代碼 403：YouTube 暫時封鎖了這個伺服器的 IP 地址。")
+            st.info("💡 解決建議：\n1. 等待 10-20 分鐘後再試。\n2. 嘗試更換另一個影片網址。\n3. 這是因為多人同時使用 Streamlit 伺服器下載導致，屬於正常網絡保護機制。")
+        else:
+            st.code(error_msg)
+
+# 頁尾說明
+st.markdown("---")
+st.caption("⚠️ 本工具僅供學術交流及個人備份使用，請尊重影片創作者版權。")
