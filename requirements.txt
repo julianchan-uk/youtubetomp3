@@ -1,2 +1,2 @@
-streamlist
-yp-dlp
+streamlit
+yt-dlp
