@@ -6,7 +6,7 @@ st.title("🎬 YouTube 高清下載 (OMV 專線)")
 
 # --- 設定你的 DDNS 地址 ---
 # 注意：確保路由器已轉發 8888 端口到 192.168.1.101
-API_URL = "http://Chanwaiman.ddns.net:8888/download"
+API_URL = "http://Chanwaiman.ddns.net:8124/download"
 
 url = st.text_input("📌 貼上 YouTube 影片網址：", placeholder="https://www.youtube.com/watch?v=...")
 
