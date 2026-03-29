@@ -31,4 +31,4 @@ if url:
                     
         except Exception as e:
             st.error(f"❌ 無法連線至 Chanwaiman.ddns.net")
-            st.info("💡 檢查清單：\n1. 路由器 Port 8888 是否已開放？\n2. OMV 上的 Docker 是否顯示為綠色 Up？")
+            st.info("💡 檢查清單：\n1. 路由器 Port 8124 是否已開放？\n2. OMV 上的 Docker 是否顯示為綠色 Up？")
