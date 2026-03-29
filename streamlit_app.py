@@ -18,7 +18,7 @@ OMV_API_URL = f"http://{OMV_TAILSCALE_IP}:8000/download"
 st.sidebar.header("📡 伺服器狀態")
 try:
     # 檢查 OMV API 是否在線 (Timeout 設短一點)
-    health_check = requests.get(f"http://{OMV_TAILSCALE_IP}:8000/", timeout=5)
+    health_check = requests.get(f"http://{OMV_TAILSCALE_IP}:8888/", timeout=5)
     if health_check.status_code == 200:
         st.sidebar.success("✅ OMV 後台連線正常")
     else:
@@ -63,4 +63,4 @@ if url:
             st.info("💡 貼士：如果你喺出面用緊 5G，記得你部手機都要開住 Tailscale App 先連到返屋企部 OMV 㗎！")
 
 st.markdown("---")
-st.caption(f"Backend: {OMV_TAILSCALE_IP} | Port: 8000")
+st.caption(f"Backend: {OMV_TAILSCALE_IP} | Port: 8888")
