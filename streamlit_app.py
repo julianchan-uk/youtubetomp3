@@ -6,7 +6,7 @@ st.title("🎬 YouTube 高清下載 (OMV 專線)")
 
 # --- 設定你的 DDNS 地址 ---
 # 注意：確保路由器已轉發 8888 端口到 192.168.1.101
-API_URL = "http://Chanwaiman.ddns.net:8123/download"
+API_URL = "http://Chanwaiman.ddns.net:8888/download"
 
 url = st.text_input("📌 貼上 YouTube 影片網址：", placeholder="https://www.youtube.com/watch?v=...")
 
@@ -31,4 +31,4 @@ if url:
                     
         except Exception as e:
             st.error(f"❌ 無法連線至 Chanwaiman.ddns.net")
-            st.info("💡 檢查清單：\n1. 路由器 Port 8123 是否已開放？\n2. OMV 上的 Docker 是否顯示為綠色 Up？")
+            st.info("💡 檢查清單：\n1. 路由器 Port 8888 是否已開放？\n2. OMV 上的 Docker 是否顯示為綠色 Up？")
