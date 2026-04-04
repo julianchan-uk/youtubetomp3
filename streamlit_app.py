@@ -5,25 +5,46 @@ st.set_page_config(page_title="私人 OMV 下載器", page_icon="🎬")
 st.title("🎬 YouTube 高清下載 (OMV 專線)")
 
 # --- 設定你的 DDNS 地址 ---
-# 注意：確保路由器已轉發 8888 端口到 192.168.1.101
 API_URL = "http://Chanwaiman.ddns.net:8888/download"
 
 url = st.text_input("📌 貼上 YouTube 影片網址：", placeholder="https://www.youtube.com/watch?v=...")
+
+# 新增格式選擇，與您的 main.py 對齊
+download_format = st.selectbox("選擇格式：", ["1080p MP4", "720p MP4", "320k MP3", "192k MP3"])
 
 if url:
     if st.button("🚀 開始解析並從家裡下載"):
         try:
             with st.spinner("正在聯絡家中的 OMV 進行下載..."):
-                # 發送請求到 DDNS
-                response = requests.get(API_URL, params={'url': url}, timeout=600)
+                # --- 關鍵修正 1：將格式名稱轉為 API 識別的字串 ---
+                fmt_map = {
+                    "1080p MP4": "1080p",
+                    "720p MP4": "low",
+                    "320k MP3": "320k",
+                    "192k MP3": "192k"
+                }
+                
+                # --- 關鍵修正 2：改用 requests.post 並發送 json ---
+                payload = {
+                    "url": url,
+                    "format": fmt_map.get(download_format, "1080p")
+                }
+                
+                # 注意：因影片下載較久，timeout 建議設長一點
+                response = requests.post(API_URL, json=payload, timeout=900)
                 
                 if response.status_code == 200:
                     st.success("✅ 下載成功！")
+                    
+                    # 嘗試從 Header 獲取檔名（選配）
+                    content_disp = response.headers.get("Content-Disposition", "")
+                    default_name = "video.mp4" if "MP4" in download_format else "music.mp3"
+                    
                     st.download_button(
-                        label="📥 儲存影片到電腦",
+                        label="📥 儲存到電腦",
                         data=response.content,
-                        file_name="video.mp4",
-                        mime="video/mp4",
+                        file_name=default_name,
+                        mime="video/mp4" if "MP4" in download_format else "audio/mpeg",
                         use_container_width=True
                     )
                 else:
@@ -31,4 +52,5 @@ if url:
                     
         except Exception as e:
             st.error(f"❌ 無法連線至 Chanwaiman.ddns.net")
-            st.info("💡 檢查清單：\n1. 路由器 Port 8888 是否已開放？\n2. OMV 上的 Docker 是否顯示為綠色 Up？")
+            st.info(f"💡 偵錯資訊: {str(e)}")
+            
